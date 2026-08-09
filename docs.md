@@ -60,7 +60,7 @@ public fun Main() { // RetrunType of Void is implicit here
 
 ### Installation
 
-**Coming soon — No compiler yet.** Aero is a work-in-progress specification — there is no compiler or CLI to install today. Once a reference implementation lands, `aero build` and `aero run` steps will replace this note. *(Planned)*
+**Coming soon — No compiler yet.** Aero is a work-in-progress specification — there is no compiler or CLI to install today. Once a reference implementation lands, `luft build` and `luft run` steps will replace this note. *(Planned)*
 
 ---
 
