@@ -14,10 +14,10 @@ Aero is a modern, statically typed, natively compiled programming language. It i
 
 ### Core Tenets
 
-- **No VM or GC — Direct to native.** Aero compiles straight to LLVM IR and native machine code. Memory management is entirely the developer's responsibility.
-- **Predictable — No hidden costs.** No hidden allocations, runtime tracing, or GC pauses — what you write is what runs.
+- **No VM or GC — Direct to native.** Aero compiles straight to LLVM IR and native machine code. Memory is automatically released when it is not referenced anywhere anymore.
+- **Predictable — No hidden costs.** No hidden allocations, runtime tracing, or GC pauses — what you write is what runs. The runtime inserts code predictably to free memory and manage threads.
 - **Ergonomic — Familiar syntax.** Heavy borrowing from C# (properties, structured types) and Kotlin (expression-based control flow, trailing lambdas).
-- **Safer manual memory — No raw pointers.** Memory is manual, but Aero abstracts raw pointer syntax (`*`, `&`, `->`, arithmetic) behind explicit `ref` types and `alloc`.
+- **Safer memory — No raw pointers.** Aero abstracts raw pointer syntax (`*`, `&`, `->`, arithmetic) behind explicit `ref` types like C#.
 
 ---
 
@@ -31,18 +31,18 @@ Variables are explicitly typed and explicitly mutable. Functions and types are P
 
 ```aero
 // Variables are explicitly typed and explicitly mutable
-val Int stepLimit = 200
-var Int stepCount = 0
+val stepLimit: Int = 200
+var stepCount = 0
 
 // Functions are always PascalCase
-public Int Clamp(Int value, Int max) {
+public fun Clamp(value: Int, max: Int) -> Int {
     return if (value > max) max else value
 }
 
 // Structs are stack-allocated value types
 public struct Point {
-    public Int X
-    public Int Y
+    var X: Int // Properties in classes or structs are public by default
+    var Y: Int
 }
 ```
 
@@ -51,8 +51,10 @@ public struct Point {
 Every program starts at a PascalCase `Main` function returning `Void`.
 
 ```aero
-public Void Main() {
-    Console.WriteLine("Hello, Aero!")
+from Core.System import Print
+
+public fun Main() { // RetrunType of Void is implicit here
+    Print("Hello, Aero!")
 }
 ```
 
@@ -71,20 +73,21 @@ Aero enforces a strict casing ruleset so a symbol's scope and behavior are commu
 | Case | Applies to | Example |
 | --- | --- | --- |
 | PascalCase | Types & primitives | `Int`, `FileStream`, `Vector2` |
+| (I)PascalCase | Traits(Interfaces) | `ISerializable` |
 | PascalCase | Functions / methods (public or private) | `ProcessData()`, `Validate()` |
 | PascalCase | Public properties & fields | `public Float X` |
 | camelCase | Private / protected fields | `private Int retryCount` |
-| camelCase | Local variables (block scope) | `val Int speed = 100` |
+| camelCase | Local variables (block scope) | `val speed = 100` |
 
 ### Statement Termination
 
-Aero is semicolon-optional, similar to Kotlin. A newline implicitly terminates a statement unless the parser is mid-continuation (an unclosed `(` `[` `{`, or right after a binary operator). Semicolons explicitly terminate statements, typically to place several on one line. A double semicolon `;;` is an explicit empty statement (NOP).
+Aero is semicolon-optional, similar to Kotlin. A newline implicitly terminates a statement unless the parser is mid-continuation (an unclosed `(` `[` `{`, or right after a binary operator). Semicolons explicitly terminate statements, typically to place several on one line. A double semicolon `;;` is an explicit empty statement (NOP). They can also be used in places where a statement is expected to be, but it is not implemented yet.
 
 ```aero
-Int x = 1; Int y = 2; Int z = 3
+x = 1; y = 2; z = 3
+condition = true
 
-doSomething();;
-;; // Valid standalone empty statement line
+if (condition) ;; /* TODO: ... */ else /* some implementation */
 ```
 
 ### Comments
@@ -94,8 +97,40 @@ Standard C-style comments: `// single-line` and `/* multi-line */`.
 ### Preprocessor & Annotations
 
 Aero has no C-style preprocessor (`#ifdef`). Instead, compiler annotations using `@` apply directly to the AST.
+These can be either for the parser:
 
-`@Packed` · `@Inline` · `@Target(OS.Windows)` · `@NoDiscard`
+`@Packed` · `@Inline` · `@NoDiscard`
+
+Or they can be made:
+
+```aero
+public annotation SomeTag // The '@' is required here for readability purposes
+```
+
+They can also store values, though they are not mutable:
+
+```aero
+public annotation Entity {
+    // please do not do this, its a really bad idea to use a single counter like this and not a UniqueList or similar
+
+    private static val counter: Long = 0 // This counter is shared through all instances of this annotation as it is static
+
+    public +Entity(id: Long? = null) { // This indicates a preassigned parameter that is not necessary to provide
+        var actualId = if (id != null) id else counter + 1
+        if (id <= counter) throw InvalidIdException($"The id: '{actualId}' has already been reserved.")
+
+        EntityRegistry.Register(actualId)
+    }
+}
+
+@Entity(0)
+public class SomeEntity
+
+val id = SomeCounter.Next()
+
+@Entity(id) // The passed values HAVE to be constants, so this would throw a compiler error 
+public class SomeOtherEntity
+```
 
 ---
 
@@ -104,10 +139,10 @@ Aero has no C-style preprocessor (`#ifdef`). Instead, compiler annotations using
 Declarations require an explicit mutability modifier followed by a C-style type. Syntax: `[val|var] Type identifier = expression`.
 
 ```aero
-val Int maxSpeed = 200 // Immutable
-var Int currentSpeed = 0 // Mutable
+val maxSpeed = 200 // Immutable
+var currentSpeed = 0 // Mutable
 currentSpeed = 50 // Valid
-// maxSpeed = 250 // Error: Cannot reassign val
+// maxSpeed = 250 // Error: Cannot mutate val
 ```
 
 - **val — Immutable.** Read-only after initialization. Reassigning is a compile error.
@@ -123,12 +158,18 @@ All primitives are written in PascalCase.
 
 | Type | Description |
 | --- | --- |
-| `Int` | 32- or 64-bit signed integer, depending on target |
+| `Int` | 32-bit signed integer |
+| `UInt` | 32-bit unsigned integer |
+| `Long` | 64-bit signed integer |
+| `ULong` | 64-bit unsigned integer |
 | `Float` | 32-bit floating point |
 | `Double` | 64-bit floating point |
 | `Bool` | Boolean |
+| `Char` | Single UTF-8 Character  |
 | `String` | UTF-8 string slice / buffer |
 | `Void` | Return type for functions returning nothing |
+
+*(We are not planning on adding an 'Any' type or something similar)*
 
 ### Structs (Value Types)
 
@@ -137,27 +178,42 @@ Stack-allocated value types by default. Passing a struct or assigning it to a ne
 ```aero
 @Packed
 public struct Point {
-    public Int X
-    public Int Y
+    var X: Int
+    var Y: Int
 
-    public Point(Int x, Int y) {
+    public +Point(Int x, Int y) {
         self.X = x
         self.Y = y
     }
 }
 ```
 
+### Records (Lightweight Value Types)
+
+Records are pure immutable value types, they are not able to have methods or any executing code for that matter, but they can be the target of extensions.
+
+```aero
+public record Point(X: Int, Y: Int)
+```
+
+
 ### Classes (Reference Types)
 
-Classes support encapsulation and complex layouts. Instances are automatically heap-allocated and reference-counted — construction, copying, and scope exit are managed by the compiler's ARC, not by manual `alloc`/`free`. See §09 for the full model.
+Classes support encapsulation and complex layouts. Instances are automatically heap-allocated — construction, copying, and scope exit are managed by the compiler's ARC. See §09 for the full model.
 
 ```aero
 public class FileConfig {
-    public String Path { get; set; }
-    private Int retryBudget = 3
+    private var path: String // this can be unassigned as it 
 
-    public FileConfig(String path) {
-        self.Path = path
+    public Path: String {
+        get => Core.System.GetAbsolutePath(path)
+        set => path = value
+    }
+
+    private var retryBudgtet = 3
+
+    public +FileConfig(String path) {
+        self.path = path
     }
 }
 ```
@@ -169,13 +225,13 @@ Properties provide getter/setter semantics backed by compiler-generated fields.
 ```aero
 public class Player {
     // Auto-property
-    public String Name { get; set; }
+    public Name: String { get; set; }
 
     // Read-only externally, writable internally
-    public Int Score { get; private set; } = 0
+    public Score: Int { get; private set; } = 0
 
     // Expression body property (derived value)
-    public Bool IsHighScore {
+    public IsHighScore: Bool {
         get => self.Score > 1000
     }
 }
@@ -191,7 +247,7 @@ Functions always use PascalCase identifiers; parameters use C-style declaration 
 
 ```aero
 public Int CalculateDamage(Int baseDamage, Bool isCritical) {
-    val Int multiplier = if (isCritical) 2 else 1
+    val multiplier = if (isCritical) 2 else 1
     return baseDamage * multiplier
 }
 ```
@@ -202,38 +258,40 @@ Aero does not use `this`. The universal instance keyword is `self`. When executi
 
 ### Extension Methods
 
-Extensions add methods to existing structs or primitives without inheritance. A single extension prefixes the method name with `Type.`; an extension block groups several.
+Extensions add methods to existing structs/recors/classes without inheritance. A single extension prefixes the method name with `Type.`; an extension block groups several.
 
 ```aero:single extension
-public Bool Int.IsEven() {
-    return self % 2 == 0
-}
+public Int.IsEven: Bool()
+    => self % 2 == 0
 ```
 
 ```aero:extension block
 extension Vector2 {
-    public Void Translate(Float dx, Float dy) {
+    public Translate(Float dx, Float dy): Vector2 {
         self.X += dx // 'self' is a hidden ref Vector2
         self.Y += dy
     }
 
-    public Float LengthSquared() {
-        return (self.X * self.X) + (self.Y * self.Y)
+    public LengthSquared(): Float {
+        return (self.X ^ 2) + (self.Y ^ 2)
     }
 }
 ```
 
 ### Trailing Lambda Blocks
 
-If a function's final argument is a function type, the caller can omit the parentheses and use a trailing block — Kotlin-style.
+If a function's final argument is a lambda, the caller can omit the parentheses and use a trailing block — Kotlin-style.
 
 ```aero
 // Declaration
-public Task Async(Func<Void> block) { ... }
+public Task(block: (id: Int) => {}) { 
+    block(Tasks.NewId())
+}
 
 // Usage
-val Task t = Async {
+Task { id ->
     File.Read("config.json")
+    PrintLn($"Reading config from Task: {id}")
 }
 ```
 
@@ -245,21 +303,21 @@ Control flow in Aero is expression-based, like Kotlin or Rust — this removes t
 
 ### if Expressions
 
-When assigning the result of an `if` expression, every branch must return the same type.
+When assigning the result of an `if` expression, every branch must return the same type AND nullability, though non-nullable types can be assigned to nullables.
 
 ```aero
-val String status = if (code == 200) "OK" else "Error"
+val status: String = if (code == 200) "OK" else "Error"
 
 // Multi-line block expressions implicitly return the last statement
 val Int modifier = if (value > 100) {
     Console.WriteLine("High value detected")
-    10 // Return value
+    return 10 // Return value
 } else {
-    2 // Return value
+    2 // Return value | The return statement can be implicit
 }
 ```
 
-### match Expressions *(Reserved for future spec)*
+### match Expressions
 
 Pattern-matching switch statement intended to replace traditional `switch`.
 
@@ -275,7 +333,7 @@ val String desc = match (status) {
 
 ## 08 · Memory Management (Zero-GC)
 
-Aero has no garbage collector — the programmer owns the memory lifecycle. It avoids C/C++-style pointer arithmetic to keep manual memory safe and readable. This section covers `struct`s and raw manual allocations; `class` instances are managed automatically instead — see §09.
+Aero has no garbage collector. It avoids C/C++-style pointer arithmetic to keep memory safe and readable. This section covers `struct`s and `class`es. Instances are managed automatically by counting the references and automatically releasing  — see §09.
 
 ### Stack by Default
 
@@ -292,57 +350,26 @@ public Void Process() {
 Use `ref` to prevent struct copying or to mutate the original instance.
 
 ```aero
-public Void Offset(ref Point p, Int dx, Int dy) {
+public Offset(ref Point p, Int dx, Int dy) {
     p.X += dx
     p.Y += dy
 }
 
-public Void Main() {
+public Main() {
     Point pt = Point(10, 20)
     Offset(ref pt, 5, 5) // Explicitly passed by reference
 }
 ```
 
-### Explicit Heap Allocation
-
-`alloc` places an object on the heap and returns a typed heap reference (`ref T`), used with plain dot notation instead of pointer dereferencing.
-
-```aero
-public Void ProcessData() {
-    ref Buffer buf = alloc Buffer(1024)
-    buf.Write("System initializing...")
-    free(buf) // Must be explicitly freed to prevent leaks
-}
-```
-
-### Scope Cleanup (defer)
-
-`defer` delays a statement until the surrounding scope exits — deterministic cleanup, including on early returns.
-
-```aero
-public String LoadConfig(String path) {
-    ref FileHandle handle = alloc FileHandle(path)
-    defer free(handle) // Guaranteed to run when LoadConfig exits
-
-    if (!handle.IsOpen) {
-        return "{}" // free(handle) runs automatically here
-    }
-
-    return handle.ReadAllText() // free(handle) runs automatically here
-}
-```
-
-`FileHandle` here is a `struct` — manual `alloc`/`free`/`defer` applies to structs and raw resources; a `class` never needs explicit `alloc` or `free` (§09).
-
 ### Destructors (RAII)
 
-A destructor is defined with a `~` prefix. For a `struct`, it runs when a stack instance goes out of scope, or when a heap instance is explicitly `free`d. For a `class`, it runs automatically the moment its ARC reference count reaches zero (§09).
+A destructor is defined with a `~` prefix. It runs automatically the moment its ARC reference count reaches zero (§09).
 
 ```aero
 public class FileStream {
     public String Path { get; set; }
 
-    public FileStream(String path) {
+    public +FileStream(String path) {
         self.Path = path
         // Open file handle logic
     }
@@ -357,50 +384,48 @@ public class FileStream {
 
 ## 09 · Reference Counting (ARC)
 
-`struct` is manual, stack-bound, zero-overhead. `class` trades that for automatic memory safety: the compiler injects deterministic retain and release calls around every reference, so class instances behave as if `alloc`/`free` never existed.
+Instances are automaticly memory safety: the compiler injects deterministic retain and release calls around every reference, so instances behave as if `alloc`/`free` never existed.
 
 ### Struct vs. Class
 
-| Attribute | struct | class |
-| --- | --- | --- |
-| Default allocation | Stack | Heap, via ARC |
-| Pass semantics | Value copy (unless `ref`) | Implicit reference |
-| Lifetime management | Manual (`alloc`/`free`/`defer`) | Automatic, compiler-injected ARC |
-| Header overhead | 0 bytes | 8 bytes (reference count) |
-| Polymorphism | Concrete only | Inheritance, virtual dispatch |
+| Attribute | struct | record | class |
+| --- | --- | --- | --- |
+| Allocation | Stack | Stack | Heap |
+| Pass semantics | Value copy (unless `ref`) | Value copy (unless `ref`) | Implicit reference |
+| Polymorphism | One Base struct + Any amount of Traits | One Base class + Any amount of Traits, virtual dispatch |
 
 ### Constructing a Class
 
-**Implicit allocation — Calling a constructor allocates.** `val Player hero = Player("Aero")` heap-allocates the instance and sets its reference count to 1 — no `alloc` keyword, no explicit `free`. *(Rule 1)*
+**Implicit allocation — Calling a constructor allocates.** `val hero = Player("Aero")` heap-allocates the instance and sets its reference count to 1 — no `alloc` keyword, no `free`. *(Rule 1)*
 
 ```aero
-val Player hero = Player("Aero")
+val hero = Player("Aero")
 ```
 
 ### Retain, Release, and Scope Exit
 
 - **Copy assignment retains.** Assigning an existing class reference to a new variable, or passing it as an argument, increments the reference count.
-- **Scope exit releases.** When a `val`/`var` holding a class reference goes out of scope — or a `var` is reassigned — the compiler decrements the reference count.
+- **Scope exit releases.** When a variable holding a class reference goes out of scope — or a `var` is reassigned — the compiler decrements the reference count.
 - **Zero triggers the destructor.** When a release brings the count to 0, the type's `~TypeName()` runs and the backing memory returns to the allocator.
 
 ```aero
-public Void ProcessPlayer() {
-    val Player p = Player("Enemy")
+public ProcessPlayer() {
+    val p = Player("Enemy")
     p.TakeDamage(50)
 } // p's reference count drops to 0 here — ~Player() runs
 ```
 
 ### Weak References
 
-Two objects that reference each other can keep each other alive forever — a reference cycle. The `weak` modifier breaks the cycle: it does not add to the reference count, and reading a `weak` reference after its target is freed safely yields `null`.
+Two objects that reference each other can keep each other alive forever — a reference cycle. The `weak` modifier breaks the cycle: it does not add to the reference count, and reading a `weak` reference after its target is freed safely yields `null`, as such, weak references are required to be nullable.
 
 ```aero
 public class Node {
-    public String Value { get; set; }
-    public Node Next { get; set; }        // Strong — keeps the next node alive
-    public weak Node Parent { get; set; } // Weak — does not keep the parent alive
+    public Value: String { get; set; }
+    public Next: Node { get; set; }        // Strong — keeps the next node alive
+    public weak Parent: Node { get; set; } // Weak — does not keep the parent alive
 
-    public Node(String value) {
+    public +Node(String value) {
         self.Value = value
     }
 }
@@ -410,4 +435,4 @@ public class Node {
 
 ---
 
-*Aero Language Specification · v0.1.0-draft · Work In Progress — unofficial docs, subject to change.*
+*Aero Language Specification · v0.2.1 · Work In Progress — unofficial docs, subject to change.*
