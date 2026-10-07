@@ -3,7 +3,7 @@
   "id": "#language",
   "title": "Aero",
   "description": "A <b>statically</b> typed, natively compiled language — Kotlin and C#-level ergonomics, C and C++ execution speed. No virtual machine or garbage collector, what you write is what runs.",
-  "badge": "v0.2.1 · Work In Progress",
+  "badge": "V{{version}} · {{status}}",
   "buttons": [
     {
       "title": "Read the Quickstart",
@@ -215,7 +215,7 @@
               "lang": "aero",
               "code": "val maxSpeed: Int = 200\nvar speed = 0\nconst MAX_PLAYERS = 4\n\nspeed = 50\n// maxSpeed = 250   error: a val cannot be reassigned"
             },
-            "Local variables are camelCase, constants are UPPER_CASE."
+            "Local variables are camelCase. Constants are UPPER_CASE, so they stand out from everything else."
           ]
         },
         {
@@ -268,7 +268,7 @@
                 ],
                 [
                   "<code>Range</code>",
-                  "a range of Int values",
+                  "a range of Int values, the end is not included",
                   "<code>1..10</code>"
                 ]
               ]
@@ -336,7 +336,7 @@
                 [
                   "Range",
                   "<code>..</code>",
-                  "Creates a Range"
+                  "Creates a Range, the end is not included"
                 ],
                 [
                   "Cast",
@@ -471,7 +471,7 @@
           "id": "#for-loops",
           "title": "For Loops",
           "content": [
-            "<code>for</code> walks over every element of an array or every value of a range. The loop variable only exists inside the loop and its type can be written out if wanted.",
+            "<code>for</code> walks over every element of an array or every value of a range. The end of a range is not included, so <code>1..4</code> covers 1, 2 and 3. The loop variable only exists inside the loop and its type can be written out if wanted.",
             {
               "type": "code",
               "lang": "aero",
@@ -487,7 +487,7 @@
             {
               "type": "code",
               "lang": "aero",
-              "code": "val text = match (code) {\n    200 => \"OK\",\n    404 => \"Not Found\",\n    else => \"Unknown\"\n}\n\nval size = match (count) {\n    0 => \"none\",\n    in 1..9 => \"few\",\n    else => \"many\"\n}"
+              "code": "val text = match (code) {\n    200 => \"OK\",\n    404 => \"Not Found\",\n    else => \"Unknown\"\n}\n\nval size = match (count) {\n    0 => \"none\",\n    in 1..10 => \"few\",\n    else => \"many\"\n}"
             },
             "Patterns available in a case:",
             {
@@ -515,8 +515,8 @@
                 ],
                 [
                   "Range",
-                  "<code>in 1..9 =></code>",
-                  "an Int inside the range"
+                  "<code>in 1..10 =></code>",
+                  "an Int inside the range, the end is not included"
                 ],
                 [
                   "Or",
@@ -546,7 +546,7 @@
             {
               "type": "code",
               "lang": "aero",
-              "code": "if (shape is Circle) { Print(\"round\") }\nif (shape is not Circle) { Print(\"not round\") }\nval small = n in 1..9"
+              "code": "if (shape is Circle) { Print(\"round\") }\nif (shape is not Circle) { Print(\"not round\") }\nval small = n in 1..10"
             }
           ]
         }
@@ -809,7 +809,7 @@
           "id": "#stack-and-ref",
           "title": "Stack and Ref",
           "content": [
-            "Local variables, structs, records and enums live on the stack and are released when their scope ends. Passing a struct to a function copies it. A <code>ref</code> parameter instead passes a mutable alias to the caller's value.",
+            "Local variables, structs, records and enums live on the stack and are released when their scope ends. Passing a struct to a function copies it. A <code>ref</code> parameter instead passes a mutable alias to the caller's value. <code>ref</code> is written at the call site as well, so passing by reference is always visible.",
             {
               "type": "code",
               "lang": "aero",
@@ -1227,7 +1227,7 @@
     "content": [
       {
         "type": "text",
-        "text": "Aero Language Specification · v0.2.1 · Work In Progress — unofficial docs, subject to change."
+        "text": "Aero Language Specification · v{{version}} · {{status}} — unofficial docs, subject to change."
       }
     ]
   }

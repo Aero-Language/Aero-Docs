@@ -20,9 +20,10 @@ This file is the reference for that format and is updated with every change to i
 {
   "title": "Aero",
   "icon": "aero.svg",
-  "default": "#spec",
+  "default": "#language",
+  "variables": { "version": "0.3.0", "status": "Work In Progress" },
   "docs": [
-    { "file": "content/spec.json", "title": "Language Spec" },
+    { "file": "content/spec.json", "title": "Language" },
     { "file": "content/compiler.json", "title": "Compiler Guide" }
   ]
 }
@@ -30,7 +31,24 @@ This file is the reference for that format and is updated with every change to i
 
 - `docs` order is the order in the top navigation
 - `default` is the root id of the document shown first
+- `variables` are values shared by all documents, see Variables
 - The root `id` inside each document file is what identifies it, `title` here is only the nav label
+
+## Variables
+
+Values that appear in many places, like the version number, are defined once and used by name.
+
+```json
+{ "badge": "v{{version}} · {{status}}" }
+```
+
+- Defined in `site.json` under `variables`, available in every document
+- A document can define its own `variables` object at the root, its values win over the site ones
+- Used as `{{name}}` in any text: titles, descriptions, badges, text blocks, table cells, button titles and the footer
+- Names are lowercase letters and `-`. Values are plain strings, they can contain inline markup but no other variables
+- Code blocks, ids, types, links and option fields (`kind`, `variant`, `lang`) are never substituted
+- Substitution runs first, before ids are built and before inline markup is parsed
+- An unknown variable is reported as a warning and stays in the text as written
 
 ## Document
 
@@ -54,6 +72,7 @@ This file is the reference for that format and is updated with every change to i
 | `title` | yes | Plain text |
 | `description` | no | Text with inline markup, single paragraph |
 | `badge` | no | Plain text shown next to the title |
+| `variables` | no | Overrides and additions to the site variables |
 | `buttons` | no | `title` plus `link`, links use the id rules below |
 | `sections` | no | Top level sections |
 | `footer` | no | Object with a `content` array |
@@ -183,7 +202,7 @@ Available in `text` blocks, the `text` of a `section` block, the document `descr
 
 ## Parser contract
 
-`parse(json)` never throws. It returns:
+`parse(json, siteVariables)` never throws. It returns:
 
 ```json
 { "doc": {}, "index": {}, "errors": [] }
@@ -202,4 +221,4 @@ Available in `text` blocks, the `text` of a `section` block, the document `descr
 
 ## Changelog
 
-- 1: first version
+- 1: first version, variables added while drafting

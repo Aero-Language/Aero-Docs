@@ -1,0 +1,394 @@
+{
+  "format": 1,
+  "id": "#compiler",
+  "title": "Luft",
+  "description": "The reference compiler for <b>Aero</b>, written in C#. How a source file becomes a program, and how the compiler is built.",
+  "badge": "Aero {{version}} · {{status}}",
+  "buttons": [
+    {
+      "title": "See the Pipeline",
+      "link": "#pipeline"
+    },
+    {
+      "title": "Read the Roadmap",
+      "link": "#roadmap"
+    }
+  ],
+  "sections": [
+    {
+      "id": "#overview",
+      "title": "Overview",
+      "content": [
+        "Luft (German for <i>air</i>) is the reference compiler and toolchain for Aero. It is written in C# and turns <code>.aero</code> source into native code through LLVM. This guide describes how it is put together, so it can be read, extended and debugged.",
+        {
+          "type": "table",
+          "headers": [
+            "Repository",
+            "Purpose"
+          ],
+          "rows": [
+            [
+              "Luft",
+              "The compiler toolchain"
+            ],
+            [
+              "Acli",
+              "The command line tool"
+            ],
+            [
+              "Aero-Docs",
+              "This site"
+            ]
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "id": "#principles",
+          "title": "Principles",
+          "content": [
+            {
+              "type": "box",
+              "title": "Hand written",
+              "subtitle": "No generators",
+              "content": [
+                "The lexer and the parser are written by hand. No parser generator, no hidden grammar."
+              ]
+            },
+            {
+              "type": "box",
+              "title": "Errors are data",
+              "subtitle": "Nothing aborts",
+              "content": [
+                "Problems are reported through <code>AeroThrower<SourceSpan></code> and checking goes on, so one mistake does not hide the others."
+              ]
+            },
+            {
+              "type": "box",
+              "title": "Passes with one job",
+              "subtitle": "Declare, resolve, check",
+              "content": [
+                "The type checker works in three passes. Each pass relies on what the previous one produced."
+              ]
+            },
+            {
+              "type": "box",
+              "title": "One tree, many visitors",
+              "subtitle": "AST visitors",
+              "content": [
+                "Tools that walk the syntax tree, like the pretty printer, are visitors over the same AST."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "#pipeline",
+      "title": "Pipeline",
+      "content": [
+        "A source file travels through these stages, each one consumes the output of the one before.",
+        {
+          "type": "code",
+          "lang": "text",
+          "code": "source.aero\n  -> Lexer           tokens\n  -> Parser          AST\n  -> Declaration     symbols and imports\n  -> Resolution      types of declarations\n  -> Body checking   typed bodies\n  -> AeroBuilder     LLVM\n  -> lld             executable"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Stage",
+            "Component",
+            "State"
+          ],
+          "rows": [
+            [
+              "Lexing",
+              "Tokenizer",
+              "Done"
+            ],
+            [
+              "Parsing",
+              "AstBuilder",
+              "Done, error recovery is planned"
+            ],
+            [
+              "Declaration pass",
+              "Type checker",
+              "Working"
+            ],
+            [
+              "Resolution pass",
+              "<code>TypeResolver</code>",
+              "Working"
+            ],
+            [
+              "Body pass",
+              "<code>BodyResolver</code>",
+              "Working, being finished"
+            ],
+            [
+              "Code generation",
+              "<code>AeroBuilder</code>",
+              "Starting"
+            ],
+            [
+              "Linking",
+              "lld",
+              "Planned"
+            ]
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "id": "#lexer",
+          "title": "Lexer",
+          "content": [
+            "The lexer is hand written and complete. It turns text into tokens and knows the keywords of the language. It also handles the parts of literals that need state: integers in decimal, hexadecimal and binary, characters, strings, multi line strings and interpolated strings that start with <code>$</code>.",
+            "Every token carries a source span, which is what later lets diagnostics point at the exact place."
+          ]
+        },
+        {
+          "id": "#parser",
+          "title": "Parser",
+          "content": [
+            "The parser, <code>AstBuilder</code>, is a recursive descent parser that produces the AST. Binary operators are parsed with real precedence levels, and the pattern tests <code>is</code> and <code>in</code> take part in them. The levels are listed in the <a href=\"#language/reference_precedence\">language reference</a>.",
+            "-- A line break or a semicolon ends a statement\n-- A declaration is read in a fixed order: annotations, access, member modifiers, inheritance modifier, keyword\n-- Where a closing <code>>></code> ends two generic argument lists, it is split into two tokens",
+            {
+              "type": "callout",
+              "kind": "planned",
+              "title": "Error recovery",
+              "content": [
+                "Today a syntax error can make the rest of a file unparseable. The plan is to recover at statement and declaration boundaries, so a small mistake stays small. The design comes before the code."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "#type-checking",
+          "title": "Type Checking",
+          "content": [
+            "The checker runs three passes, each with one job.",
+            {
+              "type": "table",
+              "headers": [
+                "Pass",
+                "Job"
+              ],
+              "rows": [
+                [
+                  "Declaration",
+                  "Walks the AST and registers every type, function and import in the symbol tables"
+                ],
+                [
+                  "Resolution",
+                  "Resolves the types written in declarations: fields, parameters, return types and base types"
+                ],
+                [
+                  "Body",
+                  "Checks function bodies, statements and expressions, and works out generic bindings"
+                ]
+              ]
+            },
+            "Types and their members live in nested scopes, a <code>TypeScope</code> per module or type. Imports are tracked per file and not per module, because several files can contribute to one module. For that reason <code>ImportsByFile</code> on the type table is keyed by file path.",
+            "What the body pass enforces:\n-- The last expression of a body is its result, <code>return</code> is for leaving early\n-- Assignment is strict, there is no implicit conversion. Mixing Int and Float in arithmetic gives a Float, and dividing two Ints gives a Float\n-- All branches of <code>if</code> and <code>match</code> need the same type when the result is used\n-- <code>break</code> and <code>continue</code> are only allowed inside a loop\n-- <code>ref</code> on a class type is an error, classes are already references"
+          ]
+        },
+        {
+          "id": "#generics",
+          "title": "Generics",
+          "content": [
+            "Generics are the most involved part of the checker. Two kinds exist and they live differently: <b>type level</b> generics, as in <code>class Box<T></code>, and <b>member level</b> generics, as in <code>fun Wrap<T>(x: T) -> T</code>. Classes, structs, records and traits can all have type parameters.",
+            "-- Visibility is permissive: a nested type or function can use the generic parameters of every enclosing type\n-- The generic names in reach are collected by climbing the scope chain, they are kept in a small set per scope and not mixed with full type symbols\n-- While a type is being checked, the names of member level generics are passed down through arrays, generic types and lambdas\n-- <code>Unify</code> binds parameters from the call's arguments. The receiver's type arguments are substituted into the parameter and return types before matching\n-- Explicit type arguments such as <code>CreatePair<String, Int></code> are bound up front\n-- Lambda parameter and return types take part in the binding\n-- An extension function is found by an exact match of its target type",
+            {
+              "type": "callout",
+              "kind": "planned",
+              "title": "Conflicting bindings",
+              "content": [
+                "When one parameter is bound to two different types in the same call, <code>Unify</code> fails silently today. It should report something like <i>T bound to Int and String</i>."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "#codegen",
+          "title": "Code Generation",
+          "content": [
+            "<code>AeroBuilder</code> lowers the checked program to LLVM through LLVMSharp. The work is split into steps, each one leaves something that can be tested.",
+            {
+              "type": "table",
+              "headers": [
+                "Step",
+                "Goal"
+              ],
+              "rows": [
+                [
+                  "1",
+                  "A typed output from the checker"
+                ],
+                [
+                  "2",
+                  "The LLVM skeleton"
+                ],
+                [
+                  "3",
+                  "Type lowering"
+                ],
+                [
+                  "4",
+                  "Functions and statements"
+                ],
+                [
+                  "5",
+                  "Expressions"
+                ],
+                [
+                  "6",
+                  "User types"
+                ],
+                [
+                  "7",
+                  "Generics, extensions and lambdas"
+                ],
+                [
+                  "8",
+                  "Library builds and CLI wiring"
+                ]
+              ]
+            },
+            "Decisions taken so far:",
+            {
+              "type": "table",
+              "headers": [
+                "Topic",
+                "Decision"
+              ],
+              "rows": [
+                [
+                  "Number types",
+                  "<code>Int</code> and <code>Float</code> are 32-bit, <code>Long</code> and <code>Double</code> are the 64-bit variants"
+                ],
+                [
+                  "Linking",
+                  "lld links the result. Whether LLVMSharp ships lld is still open"
+                ],
+                [
+                  "Class layout",
+                  "The reference count header is part of a class's layout from the start"
+                ],
+                [
+                  "Libraries",
+                  "A library builds to its own dll by default, an <code>AeroBuilderSettings</code> argument produces a single file instead"
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "#runtime",
+      "title": "Runtime",
+      "tag": "Planned",
+      "content": [
+        "Reference counting and multithreading are built after code generation is done.",
+        "-- The compiler inserts the count changes, the runtime provides them\n-- When a count reaches zero the destructor runs and the memory is released\n-- <code>weak</code> references do not count and read as <code>null</code> once their target is gone\n-- Concurrency is fiber based, functions marked <code>@Pure</code> are the ones allowed to run in parallel"
+      ]
+    },
+    {
+      "id": "#tooling",
+      "title": "Tooling",
+      "sections": [
+        {
+          "id": "#cli",
+          "title": "Command Line",
+          "content": [
+            "Acli is the command line front end of Luft. It builds a project and runs the result.",
+            {
+              "type": "callout",
+              "kind": "planned",
+              "content": [
+                "Building and running depend on code generation. Until then the tool can parse and check code."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "#language-server",
+          "title": "Language Server",
+          "content": [
+            "The language server reuses the lexer, the parser and the type checker, so the editor sees exactly what the compiler sees. It provides diagnostics, semantic colors, completion, hover information and go to definition. A plugin connects it to JetBrains IDEs.",
+            "Syntax highlighting came first, and the other features follow what the checker can answer."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "#roadmap",
+      "title": "Roadmap",
+      "content": [
+        {
+          "type": "table",
+          "headers": [
+            "Item",
+            "State"
+          ],
+          "rows": [
+            [
+              "Code generation",
+              "In progress, following the eight steps"
+            ],
+            [
+              "Runtime",
+              "After code generation"
+            ],
+            [
+              "Extension properties",
+              "Next: member lookup also has to look at extension properties and apply the receiver's type arguments"
+            ],
+            [
+              "Conflicting generic bindings",
+              "Next: report a diagnostic instead of failing silently"
+            ],
+            [
+              "Parser error recovery",
+              "Planned, design first"
+            ],
+            [
+              "Generic parameter shadowing",
+              "Later: a diagnostic when an inner type parameter hides an outer one"
+            ],
+            [
+              "Language server",
+              "In progress"
+            ],
+            [
+              "Standard library",
+              "Not started"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "#building",
+      "title": "Building from Source",
+      "content": [
+        "Luft needs the .NET SDK. From the repository root:",
+        {
+          "type": "code",
+          "lang": "text",
+          "code": "dotnet build"
+        }
+      ]
+    }
+  ],
+  "footer": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Luft Compiler Guide · Aero {{version}} · {{status}} — unofficial docs, subject to change."
+      }
+    ]
+  }
+}
