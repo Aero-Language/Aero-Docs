@@ -1,0 +1,1234 @@
+{
+  "format": 1,
+  "id": "#language",
+  "title": "Aero",
+  "description": "A <b>statically</b> typed, natively compiled language — Kotlin and C#-level ergonomics, C and C++ execution speed. No virtual machine or garbage collector, what you write is what runs.",
+  "badge": "v0.2.1 · Work In Progress",
+  "buttons": [
+    {
+      "title": "Read the Quickstart",
+      "link": "#quickstart"
+    },
+    {
+      "title": "Browse the Basics",
+      "link": "#basics"
+    }
+  ],
+  "sections": [
+    {
+      "id": "#overview",
+      "title": "Overview & Philosophy",
+      "content": [
+        "Aero is a modern, statically typed, natively compiled programming language. It combines the ergonomic syntax of Kotlin and C# with the execution speed and predictable memory behavior of C and C++. Source code is compiled to LLVM IR and from there to native machine code, there is no bytecode and no interpreter.",
+        {
+          "type": "badge",
+          "title": "Target: LLVM"
+        },
+        {
+          "type": "badge",
+          "title": "Memory: reference counted, no GC",
+          "variant": "neutral"
+        },
+        {
+          "type": "badge",
+          "title": "Stack by default",
+          "variant": "outline"
+        }
+      ],
+      "sections": [
+        {
+          "id": "#core-tenets",
+          "title": "Core Tenets",
+          "content": [
+            {
+              "type": "box",
+              "title": "Direct to native",
+              "subtitle": "No VM, no GC",
+              "content": [
+                "Aero compiles straight to LLVM IR and native machine code. Memory is released deterministically as soon as nothing references it anymore."
+              ]
+            },
+            {
+              "type": "box",
+              "title": "Predictable",
+              "subtitle": "No hidden costs",
+              "content": [
+                "No hidden allocations, no runtime tracing and no GC pauses. The compiler inserts reference counting and thread management code at predictable places."
+              ]
+            },
+            {
+              "type": "box",
+              "title": "Ergonomic",
+              "subtitle": "Familiar syntax",
+              "content": [
+                "Properties and structured types from C#, expression based control flow and trailing lambdas from Kotlin."
+              ]
+            },
+            {
+              "type": "box",
+              "title": "Safer memory",
+              "subtitle": "No raw pointers",
+              "content": [
+                "Pointer syntax and arithmetic do not exist. Sharing and mutating values is explicit through <code>ref</code>, and low level control is opt-in through <code>unsafe</code>."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "#status",
+          "title": "Project Status",
+          "content": [
+            "Aero is built together with its reference compiler <b>Luft</b>, written in C#. This document describes the language as it is designed. Whatever is specified but not implemented yet is marked as <i>planned</i>.",
+            {
+              "type": "table",
+              "headers": [
+                "Component",
+                "State"
+              ],
+              "rows": [
+                [
+                  "Lexer",
+                  "Working"
+                ],
+                [
+                  "Parser",
+                  "Working, better error recovery is planned"
+                ],
+                [
+                  "Type checker",
+                  "Working, generics and extensions are being finished"
+                ],
+                [
+                  "Language server",
+                  "Working: diagnostics, completion, hover, go to definition, semantic colors"
+                ],
+                [
+                  "Code generation (LLVM)",
+                  "Starting"
+                ],
+                [
+                  "Runtime (reference counting, threads)",
+                  "After code generation"
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "#quickstart",
+      "title": "Quickstart",
+      "content": [
+        "A first program, then the rest of the language in order from simple to complex. The chapters after this one follow that order, starting with <a href=\"#basics\">The Basics</a>."
+      ],
+      "sections": [
+        {
+          "id": "#hello-world",
+          "title": "Hello, Aero",
+          "content": [
+            "Every program starts at a function called <code>Main</code>.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "title": "Main.aero",
+              "code": "from Core.System import Print\n\npublic fun Main() {\n    Print(\"Hello, Aero!\")\n}"
+            },
+            "Line by line:\n-- <code>from Core.System import Print</code> makes the <code>Print</code> function available in this file\n-- <code>public fun</code> declares a function that can be used from outside its file\n-- <code>Main</code> is the entry point, functions are always written in PascalCase\n-- no return type is written, so it returns <code>Void</code>, which means nothing",
+            {
+              "type": "callout",
+              "kind": "planned",
+              "title": "Standard library",
+              "content": [
+                "There is no standard library yet. <code>Core.System</code> is where printing and file access will live."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "#build-and-run",
+          "title": "Build and Run",
+          "content": [
+            "The command line tool is called Luft. It will compile a project to a native executable and run it.",
+            {
+              "type": "code",
+              "lang": "text",
+              "code": "luft build\nluft run"
+            },
+            {
+              "type": "callout",
+              "kind": "planned",
+              "content": [
+                "Luft can parse and type check Aero code today, but turning it into an executable depends on code generation, which is not finished."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "#editor-support",
+          "title": "Editor Support",
+          "content": [
+            "A plugin for JetBrains IDEs adds syntax highlighting, semantic colors, code completion, hover information, go to definition and live error reporting for <code>.aero</code> files. It is backed by a language server built on the same lexer, parser and type checker as the compiler."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "#basics",
+      "title": "The Basics",
+      "content": [
+        "Everything a program needs before it does anything interesting: comments, variables, the built-in types and operators."
+      ],
+      "sections": [
+        {
+          "id": "#comments",
+          "title": "Comments",
+          "content": [
+            "Comments use the C style.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "// A single line comment\n\n/* A comment\n   over several lines */"
+            }
+          ]
+        },
+        {
+          "id": "#statements",
+          "title": "Statements",
+          "content": [
+            "A line break ends a statement. A semicolon ends it explicitly, which allows several statements on one line.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "val x = 1; val y = 2\nval z = x + y"
+            }
+          ]
+        },
+        {
+          "id": "#variables",
+          "title": "Variables",
+          "content": [
+            "A variable is introduced with one of three keywords. The type comes after the name and can be left out when the initial value makes it obvious.",
+            "-- <code>val</code> can be assigned once and is read-only afterwards\n-- <code>var</code> can be reassigned freely\n-- <code>const</code> is a compile time constant, inside a type it is also static",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "val maxSpeed: Int = 200\nvar speed = 0\nconst MAX_PLAYERS = 4\n\nspeed = 50\n// maxSpeed = 250   error: a val cannot be reassigned"
+            },
+            "Local variables are camelCase, constants are UPPER_CASE."
+          ]
+        },
+        {
+          "id": "#types",
+          "title": "Types",
+          "content": [
+            "All built-in types are written in PascalCase.",
+            {
+              "type": "table",
+              "headers": [
+                "Type",
+                "Description",
+                "Example"
+              ],
+              "rows": [
+                [
+                  "<code>Int</code>",
+                  "32-bit signed integer",
+                  "<code>42</code>, <code>0xFF</code>, <code>0b1010</code>"
+                ],
+                [
+                  "<code>Float</code>",
+                  "32-bit floating point number",
+                  "<code>3.14</code>"
+                ],
+                [
+                  "<code>Bool</code>",
+                  "true or false",
+                  "<code>true</code>"
+                ],
+                [
+                  "<code>Byte</code>",
+                  "8-bit integer",
+                  "<code>Byte::value</code>"
+                ],
+                [
+                  "<code>Char</code>",
+                  "a single character",
+                  "<code>'a'</code>"
+                ],
+                [
+                  "<code>String</code>",
+                  "UTF-8 text",
+                  "<code>\"Hello\"</code>"
+                ],
+                [
+                  "<code>Void</code>",
+                  "no value, the return type of functions that return nothing",
+                  "none"
+                ],
+                [
+                  "<code>Range</code>",
+                  "a range of Int values",
+                  "<code>1..10</code>"
+                ]
+              ]
+            },
+            "There is no <code>Any</code> type and none is planned.",
+            {
+              "type": "callout",
+              "kind": "planned",
+              "title": "More number types",
+              "content": [
+                "The 64-bit types <code>Long</code> and <code>Double</code> are specified but not part of the compiler yet."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "#strings",
+          "title": "Strings and Characters",
+          "content": [
+            "Strings use double quotes, characters single quotes. A string starting with <code>$</code> is interpolated: anything inside braces is an expression. Three double quotes start a string that spans several lines.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "val name = \"Aero\"\nval letter = 'A'\nval greeting = $\"Hello, {name}!\"\nval sum = $\"1 + 2 = {1 + 2}\"\nval poem = \"\"\"\nRoses are red,\nthis string spans lines.\n\"\"\""
+            }
+          ]
+        },
+        {
+          "id": "#operators",
+          "title": "Operators",
+          "content": [
+            {
+              "type": "table",
+              "headers": [
+                "Group",
+                "Operators",
+                "Notes"
+              ],
+              "rows": [
+                [
+                  "Arithmetic",
+                  "<code>+ - * / %</code>",
+                  "Mixing Int and Float gives a Float"
+                ],
+                [
+                  "Comparison",
+                  "<code>== != < > <= >=</code>",
+                  "Equality needs both sides to have the same type"
+                ],
+                [
+                  "Logical",
+                  "<code>&& || and or !</code>",
+                  "Work on Bool"
+                ],
+                [
+                  "Bitwise",
+                  "<code>& | ^ ~ << >></code>",
+                  "Work on Int and Byte"
+                ],
+                [
+                  "Assignment",
+                  "<code>= += -= *= /= %= &= |= ^= <<= >>=</code>",
+                  "A statement, it produces no value"
+                ],
+                [
+                  "Range",
+                  "<code>..</code>",
+                  "Creates a Range"
+                ],
+                [
+                  "Cast",
+                  "<code>::</code>",
+                  "Written as <code>Type::value</code>"
+                ],
+                [
+                  "Tests",
+                  "<code>is  is not  in</code>",
+                  "See <a href=\"#control-flow_pattern-tests\">pattern tests</a>"
+                ]
+              ]
+            },
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "val count = 10\nval ratio = count / 4            // 2.5, a Float\nval exact = Float::count / 4     // casts first, then divides\nvar total = 0\ntotal += 5"
+            },
+            {
+              "type": "callout",
+              "kind": "note",
+              "title": "Division",
+              "content": [
+                "Dividing two Ints gives a <code>Float</code>: <code>10 / 3</code> is 3.333..., not 3. Assignment is a statement, so chained assignment like <code>a = b = c</code> does not exist."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "#functions",
+      "title": "Functions",
+      "content": [
+        "Functions package code under a name. Names are always PascalCase."
+      ],
+      "sections": [
+        {
+          "id": "#declaring",
+          "title": "Declaring Functions",
+          "content": [
+            "A function has an optional access modifier, the keyword <code>fun</code>, a name, typed parameters and a return type after an arrow. Leaving the return type out means <code>Void</code>.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public fun Add(a: Int, b: Int) -> Int {\n    return a + b\n}\n\nval total = Add(2, 3)"
+            }
+          ]
+        },
+        {
+          "id": "#returning",
+          "title": "Returning Values",
+          "content": [
+            "The last expression of a function body is its result, so <code>return</code> is only needed to leave early.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public fun Square(x: Int) -> Int {\n    x * x\n}\n\npublic fun Clamp(value: Int, max: Int) -> Int {\n    if (value > max) { return max }\n    return value\n}"
+            }
+          ]
+        },
+        {
+          "id": "#expression-bodies",
+          "title": "Expression Bodies",
+          "content": [
+            "A body that is a single expression can be written after <code>=></code> instead of in braces.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public fun Twice(x: Int) -> Int => x * 2\npublic fun Greet(name: String) -> String => $\"Hello, {name}!\""
+            }
+          ]
+        },
+        {
+          "id": "#lambdas",
+          "title": "Lambdas",
+          "content": [
+            "A lambda is a function without a name, written in braces. Parameters come first, followed by an arrow. Lambdas are values, they can be stored in variables and passed around. A function type lists parameter names and types and a return type.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "val triple = { x: Int -> x * 3 }\nval six = triple(2)\n\nval shout: (text: String) -> String = { text: String -> $\"{text}!\" }"
+            }
+          ]
+        },
+        {
+          "id": "#trailing-lambdas",
+          "title": "Trailing Lambdas",
+          "content": [
+            "When the last parameter of a function is a lambda, the lambda can be written after the closing parenthesis. A lambda without declared parameters gets one implicit parameter called <code>it</code>.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public fun Each(items: Int[], action: (item: Int) -> Void) {\n    for (item in items) {\n        action(item)\n    }\n}\n\nEach([1, 2, 3]) { Print(it) }\nEach([1, 2, 3]) { n: Int -> Print($\"Value {n}\") }"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "#control-flow",
+      "title": "Control Flow",
+      "content": [
+        "Most control flow in Aero is expression based: <code>if</code> and <code>match</code> produce values. This removes the need for a ternary operator."
+      ],
+      "sections": [
+        {
+          "id": "#conditionals",
+          "title": "Conditionals",
+          "content": [
+            "The condition is wrapped in parentheses. Each branch is a block in braces, or a single expression after <code>=></code>. When the result is used as a value, every branch must have the same type and nullability, and an <code>else</code> is required.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "val label = if (count == 1) { \"item\" } else { \"items\" }\n\nval sign = if (n > 0) => \"positive\"\n    else if (n < 0) => \"negative\"\n    else => \"zero\""
+            }
+          ]
+        },
+        {
+          "id": "#while-loops",
+          "title": "While Loops",
+          "content": [
+            "<code>while</code> repeats its body as long as the condition holds. <code>break</code> leaves the loop and <code>continue</code> skips to the next round. Both are only allowed inside a loop.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "var counter = 3\nwhile (counter > 0) {\n    Print($\"T-minus {counter}\")\n    counter -= 1\n}"
+            }
+          ]
+        },
+        {
+          "id": "#for-loops",
+          "title": "For Loops",
+          "content": [
+            "<code>for</code> walks over every element of an array or every value of a range. The loop variable only exists inside the loop and its type can be written out if wanted.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "val numbers = [3, 1, 4, 1, 5]\nfor (n in numbers) {\n    Print($\"Number {n}\")\n}\n\nfor (i in 1..10) {\n    if (i % 2 == 0) { continue }\n    if (i > 7) { break }\n}"
+            }
+          ]
+        },
+        {
+          "id": "#match",
+          "title": "Match",
+          "content": [
+            "<code>match</code> compares a value against a list of patterns and runs the first case that fits. It replaces the traditional <code>switch</code> and is an expression, so all cases need the same type. The cases are checked in order and <code>else</code> must come last.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "val text = match (code) {\n    200 => \"OK\",\n    404 => \"Not Found\",\n    else => \"Unknown\"\n}\n\nval size = match (count) {\n    0 => \"none\",\n    in 1..9 => \"few\",\n    else => \"many\"\n}"
+            },
+            "Patterns available in a case:",
+            {
+              "type": "table",
+              "headers": [
+                "Pattern",
+                "Example",
+                "Matches"
+              ],
+              "rows": [
+                [
+                  "Value",
+                  "<code>404 =></code>",
+                  "a constant, an enum member or <code>null</code>"
+                ],
+                [
+                  "Type",
+                  "<code>is Enemy =></code>",
+                  "a value of that type"
+                ],
+                [
+                  "Type with name",
+                  "<code>is Enemy e =></code>",
+                  "the same, and <code>e</code> is usable in the case"
+                ],
+                [
+                  "Range",
+                  "<code>in 1..9 =></code>",
+                  "an Int inside the range"
+                ],
+                [
+                  "Or",
+                  "<code>GameState.Menu or GameState.Paused =></code>",
+                  "either side"
+                ],
+                [
+                  "Guard",
+                  "<code>is Enemy e if (e.Health > 0) =></code>",
+                  "only when the extra condition holds"
+                ],
+                [
+                  "Else",
+                  "<code>else =></code>",
+                  "everything that is left"
+                ]
+              ]
+            },
+            "Inside a case, <code>it</code> is the value that was matched. A pattern that binds a name cannot be combined with <code>or</code>."
+          ]
+        },
+        {
+          "id": "#pattern-tests",
+          "title": "Pattern Tests",
+          "content": [
+            "<code>is</code> and <code>in</code> also work outside of <code>match</code>. Both give a Bool, <code>is not</code> negates the test. A test never introduces a name, binding is only possible inside <code>match</code>.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "if (shape is Circle) { Print(\"round\") }\nif (shape is not Circle) { Print(\"not round\") }\nval small = n in 1..9"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "#data",
+      "title": "Arrays and Nullability",
+      "sections": [
+        {
+          "id": "#arrays",
+          "title": "Arrays",
+          "content": [
+            "An array type is the element type followed by <code>[]</code>. Array literals use square brackets and elements are read with an index.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "val primes: Int[] = [2, 3, 5, 7]\nval first = primes[0]\nval grid: Int[][] = [[1, 2], [3, 4]]"
+            }
+          ]
+        },
+        {
+          "id": "#nullability",
+          "title": "Nullability",
+          "content": [
+            "Types do not accept <code>null</code> by default. A question mark after the type makes it nullable. A non-nullable value can always be assigned to a nullable one, never the other way around.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "var nickname: String? = null\nnickname = \"Ace\"\n\nif (nickname != null) {\n    Print(nickname)\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "#custom-types",
+      "title": "Custom Types",
+      "content": [
+        "Types group data and behavior. Aero has structs, records, classes and enums. Their names are PascalCase.",
+        {
+          "type": "table",
+          "headers": [
+            "Kind",
+            "Lives on",
+            "Copied on assignment",
+            "Can have behavior"
+          ],
+          "rows": [
+            [
+              "<code>struct</code>",
+              "stack",
+              "yes",
+              "yes"
+            ],
+            [
+              "<code>record</code>",
+              "stack",
+              "yes",
+              "no, data only"
+            ],
+            [
+              "<code>class</code>",
+              "heap",
+              "no, the instance is shared",
+              "yes"
+            ],
+            [
+              "<code>enum</code>",
+              "stack",
+              "yes",
+              "no"
+            ]
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "id": "#structs",
+          "title": "Structs",
+          "content": [
+            "A struct is a value type. Assigning it to a new variable copies it. The parentheses after the name are the primary constructor, its parameters can be used to initialize fields in the body. Inside a method, <code>self</code> is the instance.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public struct Point(x: Int, y: Int) {\n    public var X: Int = x\n    public var Y: Int = y\n\n    public fun Offset(dx: Int, dy: Int) {\n        self.X += dx\n        self.Y += dy\n    }\n}\n\nvar a = Point(1, 2)\nvar b = a          // b is a copy\nb.Offset(10, 0)    // a is unchanged"
+            },
+            "Constructors are called by the name of the type, there is no <code>new</code>. Fields are private unless declared <code>public</code>."
+          ]
+        },
+        {
+          "id": "#classes",
+          "title": "Classes",
+          "content": [
+            "A class is a reference type. Constructing it allocates the instance on the heap, and assigning it to another variable shares the instance. How its lifetime is managed is explained in <a href=\"#memory_reference-counting\">Reference Counting</a>.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public class Player(name: String) {\n    public val Name: String = name\n    private var health: Int = 100\n\n    public fun TakeDamage(amount: Int) {\n        health -= amount\n    }\n\n    public fun IsAlive() -> Bool => health > 0\n}\n\nval hero = Player(\"Aero\")\nhero.TakeDamage(30)"
+            },
+            "Instead of a primary constructor, a class can declare constructors explicitly, there can be several. A constructor carries the name of its type.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public class Counter {\n    private var count: Int = 0\n\n    public constructor Counter(start: Int) {\n        count = start\n    }\n}"
+            }
+          ]
+        },
+        {
+          "id": "#properties",
+          "title": "Properties",
+          "content": [
+            "A property looks like a field from the outside but has accessors. Inside an accessor, <code>it</code> is the property's own backing value. An accessor without a body is generated for you. An accessor can have its own access modifier.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public class Account {\n    private var balance: Int = 0\n\n    public Balance: Int {\n        get => balance\n        private set => balance = value\n    }\n\n    public Owner: String { get; set; }\n    public Score: Int { get; private set; } = 0\n    public IsRich: Bool { get => balance > 1000 }\n    public Level: Int {\n        get => it\n        set => it = value\n    }\n}"
+            },
+            "In a setter, <code>value</code> is the assigned value. An <code>init</code> accessor works like a setter that is only allowed while the instance is constructed. Properties are public by default, fields are private."
+          ]
+        },
+        {
+          "id": "#records",
+          "title": "Records",
+          "content": [
+            "A record is immutable data. It has no methods, it can however be the target of <a href=\"#abstraction_extensions\">extensions</a>. Without a constructor of its own, a record is constructed by passing its fields in order.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public record Pair<A, B> {\n    public val First: A\n    public val Second: B\n}\n\nval pair = Pair<Int, String>(1, \"one\")"
+            }
+          ]
+        },
+        {
+          "id": "#enums",
+          "title": "Enums",
+          "content": [
+            "An enum is a fixed set of named values. Members are reached through the enum's name. An enum can give every member a value of one type.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public enum GameState {\n    Menu,\n    Playing,\n    Paused\n}\n\npublic enum Status: Int {\n    Ok = 200,\n    NotFound = 404\n}\n\nvar state = GameState.Menu\nval paused = state == GameState.Paused"
+            },
+            {
+              "type": "callout",
+              "kind": "planned",
+              "title": "Enum classes",
+              "content": [
+                "An <code>enum class</code> would let every member carry data, like in Kotlin. The syntax parses already, the details are still being designed."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "#abstraction",
+      "title": "Abstraction",
+      "content": [
+        "Sharing behavior between types, and writing code that works for many types."
+      ],
+      "sections": [
+        {
+          "id": "#traits",
+          "title": "Traits",
+          "content": [
+            "A trait is a promise: a list of functions a type has to provide. Trait names start with <code>I</code>. A type lists the traits it implements after a colon, and marks the implementing functions with <code>impl</code>.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public trait IPrintable {\n    public fun ToText() -> String\n}\n\npublic class Dog : IPrintable {\n    public impl fun ToText() -> String => \"Dog\"\n}"
+            },
+            "A type can implement any number of traits, and a trait can build on other traits with the same colon syntax."
+          ]
+        },
+        {
+          "id": "#inheritance",
+          "title": "Inheritance",
+          "content": [
+            "A class can extend one base class and implement any number of traits. The base class is always listed first. A struct can extend one base struct in the same way.",
+            {
+              "type": "table",
+              "headers": [
+                "Modifier",
+                "Meaning"
+              ],
+              "rows": [
+                [
+                  "<code>virtual</code>",
+                  "the function can be overridden"
+                ],
+                [
+                  "<code>abstract</code>",
+                  "the function has no body and must be overridden, the type cannot be constructed itself"
+                ],
+                [
+                  "<code>impl</code>",
+                  "overrides a base function or implements a trait function"
+                ],
+                [
+                  "<code>sealed</code>",
+                  "no further overriding"
+                ]
+              ]
+            },
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public abstract class Shape {\n    public abstract fun Area() -> Float\n}\n\npublic class Circle(r: Float) : Shape {\n    private val radius: Float = r\n\n    public impl fun Area() -> Float => 3.14159 * radius * radius\n}"
+            }
+          ]
+        },
+        {
+          "id": "#generics",
+          "title": "Generics",
+          "content": [
+            "Types and functions can have type parameters in angle brackets. A parameter can be limited to types that implement a trait with a colon. The compiler works out type arguments from the call when it can, otherwise they are written out.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public class Box<T>(item: T) {\n    private val content: T = item\n\n    public fun Get() -> T => content\n}\n\npublic fun First<T>(items: T[]) -> T => items[0]\n\npublic fun Largest<T: IComparable<T>>(a: T, b: T) -> T {\n    if (a.CompareTo(b) > 0) { a } else { b }\n}\n\nval box = Box<Int>(5)\nval head = First([1, 2, 3])\nval other = First<String>([\"a\", \"b\"])"
+            },
+            "A type parameter is visible everywhere inside the type it belongs to, including nested types."
+          ]
+        },
+        {
+          "id": "#extensions",
+          "title": "Extensions",
+          "content": [
+            "Extensions add functions or properties to an existing type without touching it. A single extension puts the target type in front of the name, an extension block groups several for the same type. Inside, <code>self</code> is the receiver. A member of the type always wins over an extension.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public extension fun Int.IsEven() -> Bool => (self % 2) == 0\n\npublic extensions Int {\n    public fun IsOdd() -> Bool => (self % 2) != 0\n    public fun Squared() -> Int => self * self\n}\n\nval even = 4.IsEven()"
+            }
+          ]
+        },
+        {
+          "id": "#operator-overloading",
+          "title": "Operator Overloading",
+          "content": [
+            "A type can define what an operator does with an <code>operator fun</code>. The function is named after the operator: <code>Add</code>, <code>Subtract</code>, <code>Multiply</code>, <code>Equality</code>, <code>LessThan</code> and so on. One parameter is the right-hand side of a binary operator, no parameter makes a unary operator.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public struct Vector2(x: Float, y: Float) {\n    public val X: Float = x\n    public val Y: Float = y\n\n    public operator fun Add(other: Vector2) -> Vector2 => Vector2(X + other.X, Y + other.Y)\n    public operator fun Subtract() -> Vector2 => Vector2(-X, -Y)\n}\n\nval sum = a + b\nval flipped = -a"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "#memory",
+      "title": "Memory",
+      "content": [
+        "Aero has no garbage collector and no raw pointers. Values live on the stack, class instances are reference counted."
+      ],
+      "sections": [
+        {
+          "id": "#stack-and-ref",
+          "title": "Stack and Ref",
+          "content": [
+            "Local variables, structs, records and enums live on the stack and are released when their scope ends. Passing a struct to a function copies it. A <code>ref</code> parameter instead passes a mutable alias to the caller's value.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public fun Offset(p: ref Point, dx: Int, dy: Int) {\n    p.X += dx\n    p.Y += dy\n}\n\nvar pt = Point(10, 20)\nOffset(ref pt, 5, 5)"
+            },
+            "Inside a struct method, <code>self</code> is passed as a <code>ref</code> automatically. A <code>ref</code> on a class type is an error, classes are already references."
+          ]
+        },
+        {
+          "id": "#reference-counting",
+          "title": "Reference Counting",
+          "content": [
+            "Every class instance carries a reference count. The compiler inserts the counting, you never write it.",
+            "-- Constructing a class allocates the instance on the heap and sets the count to 1\n-- Copying a reference, by assigning it or passing it as an argument, increases the count\n-- When a variable goes out of scope, or a <code>var</code> is reassigned, the count of the old value decreases\n-- When the count reaches 0, the destructor runs and the memory is returned",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public fun ProcessPlayer() {\n    val p = Player(\"Enemy\")\n    p.TakeDamage(50)\n}   // the count drops to 0 here, the Player is freed"
+            }
+          ]
+        },
+        {
+          "id": "#weak-references",
+          "title": "Weak References",
+          "content": [
+            "Two instances that reference each other keep each other alive forever. Marking one side <code>weak</code> breaks the cycle: it does not count, and it reads as <code>null</code> once the target is gone. A weak reference therefore has to be nullable.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public class Node {\n    public Value: String { get; set; }\n    public Next: Node? { get; set; }\n    public weak Parent: Node? { get; set; }\n}"
+            }
+          ]
+        },
+        {
+          "id": "#destructors",
+          "title": "Destructors",
+          "content": [
+            "A destructor runs the moment the reference count reaches zero. It is the place to release things the language does not know about, like native handles.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public class FileStream(path: String) {\n    public val Path: String = path\n\n    destructor FileStream() {\n        // close the native file handle\n    }\n}"
+            },
+            {
+              "type": "callout",
+              "kind": "planned",
+              "title": "Unsafe",
+              "content": [
+                "Blocks marked <code>unsafe</code> are planned for low level control. The reference counting runtime itself is built after code generation."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "#organizing",
+      "title": "Organizing Code",
+      "content": [
+        "Modules, imports and visibility, for programs that outgrow a single file."
+      ],
+      "sections": [
+        {
+          "id": "#modules",
+          "title": "Modules",
+          "content": [
+            "A module groups declarations under a dotted name. It is either wrapped in braces or, when it is the only module of a file, declared once at the top and covers the rest of the file. Declarations outside of any module belong to the global module.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "module Game.Core {\n    public class Enemy { }\n}"
+            },
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "module Game.Core\n\npublic class Player(name: String) {\n    public val Name: String = name\n}"
+            }
+          ]
+        },
+        {
+          "id": "#imports",
+          "title": "Imports",
+          "content": [
+            "Imports go at the top of a file. <code>import</code> makes everything of a module available, <code>from</code> picks single names. A module can be spread over many files.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "import Game.Core\nfrom Game.Core import Player, Enemy"
+            }
+          ]
+        },
+        {
+          "id": "#access",
+          "title": "Access",
+          "content": [
+            "Every declaration can state who may use it. When the modifier is left out, a default applies.",
+            {
+              "type": "table",
+              "headers": [
+                "Modifier",
+                "Visible"
+              ],
+              "rows": [
+                [
+                  "<code>public</code>",
+                  "everywhere"
+                ],
+                [
+                  "<code>internal</code>",
+                  "inside the same library or program"
+                ],
+                [
+                  "<code>protected</code>",
+                  "inside the type and the types extending it"
+                ],
+                [
+                  "<code>private</code>",
+                  "inside the type or file that declares it"
+                ]
+              ]
+            },
+            {
+              "type": "table",
+              "headers": [
+                "Declaration",
+                "Default"
+              ],
+              "rows": [
+                [
+                  "Function",
+                  "<code>private</code>"
+                ],
+                [
+                  "Field (<code>val</code>, <code>var</code>, <code>const</code>)",
+                  "<code>private</code>"
+                ],
+                [
+                  "Property",
+                  "<code>public</code>"
+                ],
+                [
+                  "Constructor",
+                  "<code>public</code>"
+                ],
+                [
+                  "Class, struct, record, trait, enum, annotation",
+                  "<code>internal</code>"
+                ],
+                [
+                  "Extension",
+                  "<code>internal</code>"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "#modifiers",
+          "title": "Modifiers",
+          "content": [
+            "A declaration is written in a fixed order: annotations, access, member modifiers, inheritance modifier, then the keyword.",
+            {
+              "type": "table",
+              "headers": [
+                "Modifier",
+                "Meaning"
+              ],
+              "rows": [
+                [
+                  "<code>static</code>",
+                  "belongs to the type instead of an instance"
+                ],
+                [
+                  "<code>weak</code>",
+                  "a reference that does not count, see <a href=\"#memory_weak-references\">weak references</a>"
+                ],
+                [
+                  "<code>partial</code>",
+                  "the declaration can be spread over several places"
+                ],
+                [
+                  "<code>unsafe</code>",
+                  "allows low level operations, planned"
+                ]
+              ]
+            },
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public static fun Empty() -> Optional<Int> {\n    Optional<Int>(null, Result.Failure)\n}"
+            }
+          ]
+        },
+        {
+          "id": "#annotations",
+          "title": "Annotations",
+          "content": [
+            "An annotation attaches information to the declaration that follows it. It is written with <code>@</code>. Arguments have to be constants. You can declare your own with <code>annotation</code>.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public annotation Entity(id: Int)\n\n@Entity(7)\npublic class Enemy { }\n\n@Packed\npublic struct Header(size: Int) {\n    public var Size: Int = size\n}"
+            },
+            {
+              "type": "callout",
+              "kind": "planned",
+              "title": "Built-in annotations",
+              "content": [
+                "<code>@Packed</code>, <code>@Inline</code> and <code>@NoDiscard</code> are meant to be understood by the compiler. Only the syntax exists today."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "#concurrency",
+      "title": "Concurrency",
+      "tag": "Planned",
+      "content": [
+        "Two keywords are reserved for running code concurrently. <code>spawn { }</code> runs a block as its own task and <code>concurrent { }</code> groups tasks. Concurrency is going to be fiber based, with functions marked <code>@Pure</code>, and without async and await.",
+        {
+          "type": "callout",
+          "kind": "planned",
+          "content": [
+            "Both blocks parse and type check like normal blocks today. They have no runtime behavior yet."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "#reference",
+      "title": "Reference",
+      "sections": [
+        {
+          "id": "#casing",
+          "title": "Casing",
+          "content": [
+            "Casing tells you what a name is without looking at its declaration.",
+            {
+              "type": "table",
+              "headers": [
+                "Case",
+                "Applies to",
+                "Example"
+              ],
+              "rows": [
+                [
+                  "PascalCase",
+                  "Types and built-in types",
+                  "<code>Int</code>, <code>FileStream</code>"
+                ],
+                [
+                  "IPascalCase",
+                  "Traits",
+                  "<code>IPrintable</code>"
+                ],
+                [
+                  "PascalCase",
+                  "Functions and methods",
+                  "<code>ProcessData()</code>"
+                ],
+                [
+                  "PascalCase",
+                  "Public properties and fields",
+                  "<code>Score</code>"
+                ],
+                [
+                  "camelCase",
+                  "Private and protected fields",
+                  "<code>retryCount</code>"
+                ],
+                [
+                  "camelCase",
+                  "Local variables and parameters",
+                  "<code>speed</code>"
+                ],
+                [
+                  "UPPER_CASE",
+                  "Constants",
+                  "<code>MAX_PLAYERS</code>"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "#keywords",
+          "title": "Keywords",
+          "content": [
+            {
+              "type": "table",
+              "headers": [
+                "Group",
+                "Keywords"
+              ],
+              "rows": [
+                [
+                  "Variables",
+                  "<code>val var const</code>"
+                ],
+                [
+                  "Declarations",
+                  "<code>fun op struct record class enum trait extension extensions annotation constructor destructor</code>"
+                ],
+                [
+                  "Access",
+                  "<code>public internal protected private</code>"
+                ],
+                [
+                  "Member modifiers",
+                  "<code>static weak partial unsafe</code>"
+                ],
+                [
+                  "Inheritance",
+                  "<code>virtual abstract sealed impl</code>"
+                ],
+                [
+                  "Control flow",
+                  "<code>if else match case while for in break continue return yield</code>"
+                ],
+                [
+                  "Modules",
+                  "<code>module import from</code>"
+                ],
+                [
+                  "Values",
+                  "<code>true false null self it</code>"
+                ],
+                [
+                  "Operators as words",
+                  "<code>is not and or</code>"
+                ],
+                [
+                  "Other",
+                  "<code>ref concurrent spawn get set init</code>"
+                ]
+              ]
+            },
+            "Reserved but without a function today: <code>case</code> and <code>yield</code>. <code>operator</code> is only special directly in front of <code>fun</code>."
+          ]
+        },
+        {
+          "id": "#precedence",
+          "title": "Operator Precedence",
+          "content": [
+            "From loosest to tightest binding.",
+            {
+              "type": "table",
+              "headers": [
+                "Level",
+                "Operators"
+              ],
+              "rows": [
+                [
+                  "1",
+                  "<code>or</code>  <code>||</code>"
+                ],
+                [
+                  "2",
+                  "<code>and</code>  <code>&&</code>"
+                ],
+                [
+                  "3",
+                  "<code>|</code>"
+                ],
+                [
+                  "4",
+                  "<code>^</code>"
+                ],
+                [
+                  "5",
+                  "<code>&</code>"
+                ],
+                [
+                  "6",
+                  "<code>==</code>  <code>!=</code>"
+                ],
+                [
+                  "7",
+                  "<code><</code>  <code>></code>  <code><=</code>  <code>>=</code>  <code>is</code>  <code>in</code>"
+                ],
+                [
+                  "8",
+                  "<code>..</code>"
+                ],
+                [
+                  "9",
+                  "<code><<</code>  <code>>></code>"
+                ],
+                [
+                  "10",
+                  "<code>+</code>  <code>-</code>"
+                ],
+                [
+                  "11",
+                  "<code>*</code>  <code>/</code>  <code>%</code>"
+                ],
+                [
+                  "12",
+                  "<code>::</code>"
+                ],
+                [
+                  "13",
+                  "member access, call, index"
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "footer": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Aero Language Specification · v0.2.1 · Work In Progress — unofficial docs, subject to change."
+      }
+    ]
+  }
+}
