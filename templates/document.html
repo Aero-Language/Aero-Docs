@@ -1,0 +1,11 @@
+<article class="doc" data-doc="{{docId}}">
+<header class="doc-hero">
+{{{badge}}}<h1 class="doc-title">{{title}}</h1>
+{{{description}}}{{{buttons}}}</header>
+<div class="doc-body">{{{chapters}}}</div>
+{{{footer}}}
+</article>
+<template data-part="badge"><span class="doc-badge doc-badge-outline doc-hero-badge">{{text}}</span></template>
+<template data-part="description"><p class="doc-description">{{{content}}}</p></template>
+<template data-part="buttons"><div class="doc-buttons">{{{items}}}</div></template>
+<template data-part="button"><a class="doc-button doc-button-{{kind}}" href="{{href}}">{{title}}</a></template>

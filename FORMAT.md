@@ -10,7 +10,8 @@ This file is the reference for that format and is updated with every change to i
 - `site.json`: the manifest, lists every document and the site-wide settings
 - `content/*.json`: one file per document (spec, compiler guide, ...)
 - `templates/*.html`: one HTML template per block type
-- `src/parser.js`: pure function, JSON in, document tree out, no DOM access
+- `src/parser.js`: pure functions, JSON in, document tree out, no DOM access
+- `tests/parser.test.mjs`: tests for the parser, they also check the real content files
 - `src/render.js`: tree plus templates in, HTML out
 - `css/style.css`: all styling
 
@@ -205,12 +206,25 @@ Available in `text` blocks, the `text` of a `section` block, the document `descr
 `parse(json, siteVariables)` never throws. It returns:
 
 ```json
-{ "doc": {}, "index": {}, "errors": [] }
+{ "doc": {}, "index": {}, "order": [], "errors": [] }
 ```
 
 - `doc` is the normalized tree: every shorthand expanded, global ids set, empty blocks removed
 - `index` maps every global id to its section node, used for navigation and search
+- `order` lists the global ids in document order, used for previous and next links and for search
 - `errors` is a list of `{ "level": "error" | "warning", "path": "sections[2].content[1]", "message": "..." }`
+
+Text and table cells come out as inline nodes: a plain string, or `{ "tag": "b" | "i" | "q" | "code" | "br", "children": [] }`, and `{ "tag": "a", "href": "...", "children": [] }` for links.
+Text blocks come out as `parts`, each either a paragraph (`kind: "p"`, `inline`) or a list (`kind: "list"`, `items`).
+
+Further exports of `src/parser.js`, all without side effects:
+
+- `parseSite(json)` validates the manifest and returns `{ site, errors }`
+- `resolveLink(href, currentDocId, docs)` returns `{ docId, gid }`, `{ external: true }` or `null`
+- `validateLinks(docs)` returns one error for every dead link or duplicate root id across all documents
+- `sectionToText(section)` returns the plain text of a section's own content for search
+
+Run the tests with `npm test`.
 
 ## Rendering contract
 
