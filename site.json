@@ -3,7 +3,7 @@
   "icon": "assets/aero.svg",
   "default": "#language",
   "variables": {
-    "version": "0.3.0",
+    "version": "V0.3.0",
     "status": "Work In Progress"
   },
   "docs": [
