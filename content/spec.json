@@ -927,7 +927,7 @@
                 ],
                 [
                   "<code>private</code>",
-                  "inside the type or file that declares it"
+                  "inside the scope that declares it"
                 ]
               ]
             },
