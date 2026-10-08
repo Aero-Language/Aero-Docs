@@ -275,10 +275,11 @@ function parseBlock(raw, path, ctx) {
     }
     case "code": {
       if (!isStr(raw.code) || raw.code === "") return null;
+      var lang = isStr(raw.lang) && raw.lang ? raw.lang : "text";
       return {
         type: "code",
-        lang: isStr(raw.lang) && raw.lang ? raw.lang : "text",
-        title: isStr(raw.title) && raw.title ? raw.title : null,
+        lang: lang,
+        title: isStr(raw.title) && raw.title ? raw.title : lang,
         code: raw.code,
       };
     }
