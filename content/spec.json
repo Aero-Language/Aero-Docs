@@ -1129,7 +1129,7 @@
                 ],
                 [
                   "Control flow",
-                  "<code>if else match case while for in break continue return yield</code>"
+                  "<code>if else match case while for in break continue return</code>"
                 ],
                 [
                   "Modules",
