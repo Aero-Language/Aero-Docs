@@ -3,7 +3,7 @@
   "id": "#language",
   "title": "Aero",
   "description": "A <b>statically</b> typed, natively compiled language — Kotlin and C#-level ergonomics, C and C++ execution speed. No virtual machine or garbage collector, what you write is what runs.",
-  "badge": "V{{version}} · {{status}}",
+  "badge": "{{version}} · {{status}}",
   "buttons": [
     {
       "title": "Read the Quickstart",
@@ -788,11 +788,11 @@
           "id": "#operator-overloading",
           "title": "Operator Overloading",
           "content": [
-            "A type can define what an operator does with an <code>operator fun</code>. The function is named after the operator: <code>Add</code>, <code>Subtract</code>, <code>Multiply</code>, <code>Equality</code>, <code>LessThan</code> and so on. One parameter is the right-hand side of a binary operator, no parameter makes a unary operator.",
+            "A type can define what an operator does with an <code>operator fun</code>. The function is named after the operator: <code>+</code>, <code>-</code>, <code>*</code>, <code>==</code>, <code><</code> and so on. One parameter is the right-hand side of a binary operator, no parameter makes a unary operator.",
             {
               "type": "code",
               "lang": "aero",
-              "code": "public struct Vector2(x: Float, y: Float) {\n    public val X: Float = x\n    public val Y: Float = y\n\n    public operator fun Add(other: Vector2) -> Vector2 => Vector2(X + other.X, Y + other.Y)\n    public operator fun Subtract() -> Vector2 => Vector2(-X, -Y)\n}\n\nval sum = a + b\nval flipped = -a"
+              "code": "public struct Vector2(x: Float, y: Float) {\n    public val X: Float = x\n    public val Y: Float = y\n\n    public operator fun +(other: Vector2) -> Vector2 => Vector2(X + other.X, Y + other.Y)\n    public operator fun -() -> Vector2 => Vector2(-X, -Y)\n}\n\nval sum = a + b\nval flipped = -a"
             }
           ]
         }
