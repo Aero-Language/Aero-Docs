@@ -191,7 +191,7 @@ test("real content parses clean", () => {
   assert.equal(siteRaw.site.default in docs, true);
   assert.deepEqual(validateLinks(docs), []);
   const spec = docs["#language"];
-  assert.equal(spec.doc.badge, "v0.3.0 · Work In Progress");
+  assert.equal(spec.doc.badge, "V0.3.0 · Work In Progress");
   assert.ok(spec.index["#memory_reference-counting"]);
   assert.ok(sectionToText(spec.index["#quickstart_hello-world"]).includes("Hello, Aero!"));
   assert.ok(docs["#compiler"].index["#pipeline_lexer"]);

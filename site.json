@@ -1,6 +1,6 @@
 {
   "title": "Aero",
-  "icon": "aero.svg",
+  "icon": "assets/aero.svg",
   "default": "#language",
   "variables": {
     "version": "0.3.0",

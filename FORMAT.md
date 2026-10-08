@@ -20,7 +20,7 @@ This file is the reference for that format and is updated with every change to i
 ```json
 {
   "title": "Aero",
-  "icon": "aero.svg",
+  "icon": "assets/aero.svg",
   "default": "#language",
   "variables": { "version": "0.3.0", "status": "Work In Progress" },
   "docs": [
