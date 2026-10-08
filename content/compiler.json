@@ -32,8 +32,8 @@
               "The compiler toolchain"
             ],
             [
-              "Acli",
-              "The command line tool"
+              "Luft Cli",
+              "The command line tool for Luft"
             ],
             [
               "Aero-Docs",
