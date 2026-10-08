@@ -303,7 +303,7 @@
           "id": "#cli",
           "title": "Command Line",
           "content": [
-            "Acli is the command line front end of Luft. It builds a project and runs the result.",
+            "Luft Cli is the command line front end of Luft. It builds a project and runs the result.",
             {
               "type": "callout",
               "kind": "planned",
