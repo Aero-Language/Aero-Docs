@@ -1074,7 +1074,7 @@
                 ],
                 [
                   "PascalCase",
-                  "Public properties and fields",
+                  "Properties and non-private fields",
                   "<code>Score</code>"
                 ],
                 [
