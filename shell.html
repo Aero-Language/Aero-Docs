@@ -1,0 +1,20 @@
+<a class="shell-skip" href="#content">Skip to content</a>
+<div class="shell" data-shell>
+<header class="shell-bar">
+<button type="button" class="shell-menu" data-menu aria-expanded="false" aria-controls="shell-nav">Menu</button>
+<a class="shell-brand" href="{{home}}">{{{logo}}}<span class="shell-title">{{title}}</span></a>
+<nav class="shell-tabs" aria-label="Documents" data-tabs>{{{tabs}}}</nav>
+<div class="shell-search" data-search-box>
+<input class="shell-search-input" type="search" placeholder="Search" aria-label="Search the docs" data-search autocomplete="off">
+<div class="shell-search-results" data-results hidden></div>
+</div>
+</header>
+<div class="shell-frame">
+<nav class="shell-nav" id="shell-nav" aria-label="Chapters" data-nav>{{{nav}}}</nav>
+<main class="shell-main" id="content" tabindex="-1" data-main>{{{main}}}</main>
+</div>
+</div>
+<template data-part="tab"><a class="shell-tab" href="{{href}}">{{title}}</a></template>
+<template data-part="tab-current"><a class="shell-tab shell-tab-current" href="{{href}}" aria-current="page">{{title}}</a></template>
+<template data-part="logo"><img class="shell-logo" src="{{src}}" alt="" width="32" height="32"></template>
+<template data-part="error"><div class="shell-error" role="alert"><p class="shell-error-title">Something went wrong</p><p class="shell-error-text">{{message}}</p></div></template>

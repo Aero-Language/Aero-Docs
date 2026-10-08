@@ -1,0 +1,4 @@
+<ul class="nav-list">{{{items}}}</ul>
+<template data-part="item"><li class="nav-item nav-item-level-{{level}}"><a class="nav-link" href="{{href}}" data-gid="{{gid}}">{{title}}{{{tag}}}</a>{{{children}}}</li></template>
+<template data-part="children"><ul class="nav-list nav-sublist">{{{items}}}</ul></template>
+<template data-part="tag"><span class="nav-tag">{{text}}</span></template>

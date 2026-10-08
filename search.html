@@ -1,0 +1,5 @@
+<ul class="search-list">{{{items}}}</ul>
+<template data-part="item"><li class="search-item"><a class="search-link" href="{{href}}"><span class="search-title">{{title}}</span><span class="search-where">{{where}}</span>{{{snippet}}}</a></li></template>
+<template data-part="snippet"><span class="search-snippet">{{before}}<mark class="search-mark">{{match}}</mark>{{after}}</span></template>
+<template data-part="snippet-plain"><span class="search-snippet">{{text}}</span></template>
+<template data-part="empty"><p class="search-empty">Nothing found for {{query}}</p></template>
