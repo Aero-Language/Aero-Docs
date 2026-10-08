@@ -1227,7 +1227,7 @@
     "content": [
       {
         "type": "text",
-        "text": "Aero Language Specification · v{{version}} · {{status}} — unofficial docs, subject to change."
+        "text": "Aero Language Specification · v{{version}} · {{status}} — official documentation, subject to change."
       }
     ]
   }
