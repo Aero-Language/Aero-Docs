@@ -20,10 +20,10 @@ package.aeropkg
 
 |     Path      |                             Explanation                             |Optional |
 |---------------|---------------------------------------------------------------------|---------|
-|`/assets`      |Assets for the package like images/icons                             |    󰄬    |
-|`/package`     |The actual files for the package like binaries                       |    󰅖    |
-|`manifest.json`|Describes what type of package it is and where to find certain things|    󰅖    |
-|`README.md`    |The README from github or                                            |    󰄬    |
+|`/assets`      |Assets for the package like images/icons                             |    ✔️   |
+|`/package`     |The actual files for the package like binaries                       |    ❌️   |
+|`manifest.json`|Describes what type of package it is and where to find certain things|    ❌️   |
+|`README.md`    |The README from github or                                            |    ✔️   |
 
 
 ## Manifest
