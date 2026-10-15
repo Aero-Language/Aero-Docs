@@ -1,4 +1,4 @@
-# Content Format
+# Doc Content Specification
 
 Format version: 1
 
