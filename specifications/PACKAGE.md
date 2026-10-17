@@ -4,6 +4,7 @@ The AeroPackage standard is a file standard that describes how a package is stru
 
 ## Structure
 An AeroPackage is an archive that is very adaptable and is used somewhat differently depending on context.
+The AeroPackage standard allows a type to have its own extension, `.aeropkg` stays the default.
 
 For example, a Luft Compiler Plugin is also an AeroPackage. 
 Just like the main way of loading Plugins uses the AeroPackage format as well.
