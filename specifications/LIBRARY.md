@@ -1,7 +1,7 @@
 # AeroLibrary Specification
 An AeroLibrary is an AeroPackage of the type `#lib`. It carries a compiled library plus *headers*: pretty printed Aero files that only name what the library offers, so the compiler never has to analyse a binary to find out what is inside.
 
-The extension of a library package is `.aerolib`. The AeroPackage standard allows an application to pick its own extension, `.aeropkg` stays the default.
+The extension of a library package is `.aerolib`. Because AeroPackage standard allows a type to have its own extension.
 
 
 ## Structure
