@@ -239,7 +239,7 @@
                 [
                   "<code>Long</code>",
                   "64-bit signed integer",
-                  "<code>42L</code>, <code>0xFFL</code>"
+                  "<code>42L</code>, <code>0xFFL</code>, <code>0b101L</code>"
                 ],
                 [
                   "<code>Float</code>",
@@ -284,7 +284,7 @@
               ]
             },
             "There is no <code>Any</code> type and none is planned.",
-            "A number literal is an <code>Int</code> or a <code>Float</code> by default. A trailing <code>L</code> makes an integer a <code>Long</code>, a trailing <code>d</code> makes any number a <code>Double</code>. There is no implicit conversion between number types, so use a cast such as <code>Long::count</code>."
+            "A number literal is an <code>Int</code> or a <code>Float</code> by default. A trailing <code>L</code> makes an integer a <code>Long</code>, a trailing <code>d</code> makes any number a <code>Double</code> and a trailing <code>f</code> makes any number a <code>Float</code>. In hexadecimal literals <code>d</code> and <code>f</code> are digits, so there only <code>L</code> works. An <code>Int</code> fits where a <code>Long</code> is expected and a <code>Float</code> where a <code>Double</code> is expected, but not inside arrays. Every other conversion between number types needs a cast such as <code>Int::count</code>."
           ]
         },
         {
