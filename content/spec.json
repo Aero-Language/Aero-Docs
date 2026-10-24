@@ -237,9 +237,19 @@
                   "<code>42</code>, <code>0xFF</code>, <code>0b1010</code>"
                 ],
                 [
+                  "<code>Long</code>",
+                  "64-bit signed integer",
+                  "<code>42L</code>, <code>0xFFL</code>"
+                ],
+                [
                   "<code>Float</code>",
                   "32-bit floating point number",
                   "<code>3.14</code>"
+                ],
+                [
+                  "<code>Double</code>",
+                  "64-bit floating point number",
+                  "<code>3.14d</code>, <code>2d</code>"
                 ],
                 [
                   "<code>Bool</code>",
@@ -274,14 +284,7 @@
               ]
             },
             "There is no <code>Any</code> type and none is planned.",
-            {
-              "type": "callout",
-              "kind": "planned",
-              "title": "More number types",
-              "content": [
-                "The 64-bit types <code>Long</code> and <code>Double</code> are specified but not part of the compiler yet."
-              ]
-            }
+            "A number literal is an <code>Int</code> or a <code>Float</code> by default. A trailing <code>L</code> makes an integer a <code>Long</code>, a trailing <code>d</code> makes any number a <code>Double</code>. There is no implicit conversion between number types, so use a cast such as <code>Long::count</code>."
           ]
         },
         {
@@ -311,7 +314,7 @@
                 [
                   "Arithmetic",
                   "<code>+ - * / %</code>",
-                  "Mixing Int and Float gives a Float"
+                  "Mixing Int and Float gives a Float, a Long and an Int gives a Long, and a Double or a Long with a Float gives a Double. Dividing two whole numbers gives a Float, or a Double when a Long is involved"
                 ],
                 [
                   "Comparison",
@@ -326,7 +329,7 @@
                 [
                   "Bitwise",
                   "<code>& | ^ ~ << >></code>",
-                  "Work on Int and Byte"
+                  "Work on Int, Long and Byte"
                 ],
                 [
                   "Assignment",
