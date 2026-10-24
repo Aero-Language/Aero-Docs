@@ -567,8 +567,9 @@
             {
               "type": "code",
               "lang": "aero",
-              "code": "val primes: Int[] = [2, 3, 5, 7]\nval first = primes[0]\nval grid: Int[][] = [[1, 2], [3, 4]]"
-            }
+              "code": "val primes: Int[] = [2, 3, 5, 7]\nval first = primes[0]\nval grid: Int[][] = [[1, 2], [3, 4]]\nval count = primes.Length   // 4"
+            },
+            "<code>Length</code> gives the number of elements as an <code>Int</code>. It is read only."
           ]
         },
         {
