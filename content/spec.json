@@ -474,7 +474,7 @@
           "id": "#for-loops",
           "title": "For Loops",
           "content": [
-            "<code>for</code> walks over every element of an array or every value of a range. The end of a range is not included, so <code>1..4</code> covers 1, 2 and 3. The loop variable only exists inside the loop and its type can be written out if wanted.",
+            "<code>for</code> walks over every element of an array or every value of a range. The end of a range is not included, so <code>1..4</code> covers 1, 2 and 3. The loop variable only exists inside the loop and its type can be written out if wanted. Any type that implements <code>TIterable</code> can be looped over as well: its <code>Iterator()</code> gives a <code>TIterator</code>, and the loop runs while <code>HasNext</code> is true and reads each item from <code>Next</code>.",
             {
               "type": "code",
               "lang": "aero",
@@ -717,13 +717,18 @@
           "id": "#traits",
           "title": "Traits",
           "content": [
-            "A trait is a promise: a list of functions a type has to provide. Trait names start with <code>I</code>. A type lists the traits it implements after a colon, and marks the implementing functions with <code>impl</code>.",
+            "A trait is a promise: a list of functions a type has to provide. Trait names start with <code>T</code>. A type lists the traits it implements after a colon, and marks the implementing functions with <code>impl</code>.",
             {
               "type": "code",
               "lang": "aero",
-              "code": "public trait IPrintable {\n    public fun ToText() -> String\n}\n\npublic class Dog : IPrintable {\n    public impl fun ToText() -> String => \"Dog\"\n}"
+              "code": "public trait TPrintable {\n    public fun ToText() -> String\n}\n\npublic class Dog : TPrintable {\n    public impl fun ToText() -> String => \"Dog\"\n}"
             },
-            "A type can implement any number of traits, and a trait can build on other traits with the same colon syntax."
+            "A type can implement any number of traits, and a trait can build on other traits with the same colon syntax. A trait can also list properties, written like an automatic property, and the implementing type provides them with <code>impl</code>. Reading the property of a trait value calls the implementation.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "public trait TNamed {\n    public Name: String { get; }\n}\n\npublic class Dog : TNamed {\n    public impl Name: String { get => \"Dog\" }\n}"
+            }
           ]
         },
         {
@@ -771,7 +776,7 @@
             {
               "type": "code",
               "lang": "aero",
-              "code": "public class Box<T>(item: T) {\n    private val content: T = item\n\n    public fun Get() -> T => content\n}\n\npublic fun First<T>(items: T[]) -> T => items[0]\n\npublic fun Largest<T: IComparable<T>>(a: T, b: T) -> T {\n    if (a.CompareTo(b) > 0) { a } else { b }\n}\n\nval box = Box<Int>(5)\nval head = First([1, 2, 3])\nval other = First<String>([\"a\", \"b\"])"
+              "code": "public class Box<T>(item: T) {\n    private val content: T = item\n\n    public fun Get() -> T => content\n}\n\npublic fun First<T>(items: T[]) -> T => items[0]\n\npublic fun Largest<T: TComparable<T>>(a: T, b: T) -> T {\n    if (a.CompareTo(b) > 0) { a } else { b }\n}\n\nval box = Box<Int>(5)\nval head = First([1, 2, 3])\nval other = First<String>([\"a\", \"b\"])"
             },
             "A type parameter is visible everywhere inside the type it belongs to, including nested types."
           ]
@@ -1017,6 +1022,12 @@
               "lang": "aero",
               "code": "public annotation Entity(id: Int)\n\n@Entity(7)\npublic class Enemy { }\n\n@Packed\npublic struct Header(size: Int) {\n    public var Size: Int = size\n}"
             },
+            "<code>@Lang(\"Name\")</code> marks the declaration the compiler uses for a language feature. The standard library tags its types this way, so they can be named and placed freely. <code>for</code> over a non-array looks for the trait marked <code>@Lang(\"Iterable\")</code>, whose iterator is the one marked <code>@Lang(\"Iterator\")</code>.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "@Lang(\"Iterable\")\npublic trait TIterable<T> {\n    public fun Iterator() -> TIterator<T>\n}\n\n@Lang(\"Iterator\")\npublic trait TIterator<T> {\n    public HasNext: Bool { get; }\n    public Next: T { get; }\n}"
+            },
             {
               "type": "callout",
               "kind": "planned",
@@ -1067,9 +1078,9 @@
                   "<code>Int</code>, <code>FileStream</code>"
                 ],
                 [
-                  "IPascalCase",
+                  "TPascalCase",
                   "Traits",
-                  "<code>IPrintable</code>"
+                  "<code>TPrintable</code>"
                 ],
                 [
                   "PascalCase",
