@@ -1037,6 +1037,27 @@
               ]
             }
           ]
+        },
+        {
+          "id": "#extern",
+          "title": "Extern Declarations",
+          "content": [
+            "<code>extern</code> marks a function or property that has no body here because something else provides it. It is written among the member modifiers. With the <code>@Library</code> annotation the function lives in a native library: the first argument names the library, the optional second one the native function when it differs from the Aero name. Native functions have to be static, not generic and only use <code>Int</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>, <code>Bool</code>, <code>Byte</code>, <code>Char</code> and <code>String</code>, which are mapped to their C counterparts.",
+            {
+              "type": "code",
+              "lang": "aero",
+              "code": "@Library(\"m\", \"sqrt\") public static extern fun Sqrt(x: Double) -> Double\n\n@Library(\"m\") public static extern fun cos(x: Double) -> Double"
+            },
+            "Without <code>@Library</code> an <code>extern</code> declaration only names something the compiler implements itself, such as the length of an array, so that the standard library can describe it.",
+            {
+              "type": "callout",
+              "kind": "planned",
+              "title": "Calling native functions",
+              "content": [
+                "Declarations and their checks exist. Calling a native function from compiled code and linking its library is not implemented yet."
+              ]
+            }
+          ]
         }
       ]
     },

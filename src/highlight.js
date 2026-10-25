@@ -3,7 +3,7 @@ import { escapeHtml } from "./render.js";
 const KEYWORDS = new Set([
   "val", "var", "const", "fun", "return", "yield", "if", "else", "while", "for", "in", "break", "continue", "match", "case",
   "class", "struct", "record", "trait", "enum", "annotation", "op", "extension", "extensions", "constructor", "destructor",
-  "public", "internal", "protected", "private", "static", "weak", "partial", "unsafe", "virtual", "abstract", "sealed", "impl",
+  "public", "internal", "protected", "private", "static", "weak", "partial", "unsafe", "extern", "virtual", "abstract", "sealed", "impl",
   "ref", "module", "import", "from", "concurrent", "spawn", "true", "false", "null", "self", "base", "it", "get", "set", "init",
   "is", "not", "and", "or",
 ]);
