@@ -1049,14 +1049,8 @@
               "code": "@Library(\"m\", \"sqrt\") public static extern fun Sqrt(x: Double) -> Double\n\n@Library(\"m\") public static extern fun cos(x: Double) -> Double"
             },
             "Without <code>@Library</code> an <code>extern</code> declaration only names something the compiler implements itself, such as the length of an array, so that the standard library can describe it.",
-            {
-              "type": "callout",
-              "kind": "planned",
-              "title": "Calling native functions",
-              "content": [
-                "Declarations and their checks exist. Calling a native function from compiled code and linking its library is not implemented yet."
-              ]
-            }
+            "A call goes through a generated wrapper with the Aero signature. <code>Int</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>, <code>Bool</code>, <code>Byte</code> and <code>Char</code> map to <code>int32_t</code>, <code>int64_t</code>, <code>float</code>, <code>double</code>, <code>int8_t</code>, <code>int8_t</code> and <code>uint16_t</code>. A <code>String</code> is passed as a null terminated UTF-8 copy, and a returned <code>const char*</code> is copied into a new <code>String</code>. Other types cannot be passed to native code.",
+            "The first argument of <code>@Library</code> is linked: a plain name like <code>m</code> becomes <code>-lm</code>, a path or a file name with an extension is passed to the linker as it is."
           ]
         }
       ]
